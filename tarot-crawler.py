@@ -5,7 +5,7 @@ import json
 
 '''
 {
-    MajorArcana:
+    majorarcana:
         [
             {
                 card:
@@ -18,7 +18,7 @@ import json
                     reversed:
             }
         ]
-    MinorArcana:
+    minorarcana:
         {
             Wands:
                 [
@@ -64,7 +64,10 @@ def get_minor_arcana_urls(client, seed):
     urls = []
     for a in a_tags:
         if 'minor-arcana' in a['href']:
-            urls.append(base_url + a['href'])
+            if base_url not in a['href']:
+                urls.append(base_url + a['href'])
+            else:
+                urls.append(a['href'])
     del urls[0]
     return urls
 
@@ -108,7 +111,7 @@ def get_major_arcana_info(client, urls):
         card['info']['upright'] = card['info']['upright'].strip()
         card['info']['reversed'] = card['info']['reversed'].strip()
         MajorArcana.append(card)
-        return MajorArcana
+    return MajorArcana
 
 def get_minor_arcana_info(client, urls, seed):
     suit_of_seed = []
@@ -149,7 +152,6 @@ def get_minor_arcana_info(client, urls, seed):
         card['short_info']['description'] = card['short_info']['description'].strip()
         card['info']['upright'] = card['info']['upright'].strip()
         card['info']['reversed'] = card['info']['reversed'].strip()
-        #print(card)
         suit_of_seed.append(card)
     return suit_of_seed
 
@@ -157,15 +159,12 @@ if __name__ == '__main__':
     client = httpx.Client()
     client.headers = {
         "User-Agent": "Tarot Crawler. Source code on GitHub soon!"
-        #"User-Agent": "Mozilla/5.0 (Linux; Android 11; Pixel 5 Build/RQ3A.210805.001.A1; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.159 Mobile Safari/537.36"
     }
     MA_urls = get_major_arcana_urls(client)
-    #MA_urls = ['https://www.biddytarot.com/tarot-card-meanings/major-arcana/fool/']
     MajorArcana = get_major_arcana_info(client, MA_urls)
     minorArcana = {}
     ma_urls = get_minor_arcana_urls(client, seed='cups')
     minorArcana['cups'] = get_minor_arcana_info(client, ma_urls, seed='cups')
-    #print(minorArcana)
     ma_urls = get_minor_arcana_urls(client, seed='swords')
     minorArcana['swords'] = get_minor_arcana_info(client, ma_urls, seed='swords')
     ma_urls = get_minor_arcana_urls(client, seed='pentacles')
